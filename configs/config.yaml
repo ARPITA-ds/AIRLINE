@@ -1,0 +1,12 @@
+data_ingestion_config:
+    dataset_download_file_name: Airline_satisfaction.csv
+    dataset_download_id: https://raw.githubusercontent.com/ARPITA-ds/AIRLINE/master/cleaned_airline.csv
+    ingested_dir: ingested_data
+    ingested_test_file: test.csv
+    ingested_train_file: train.csv
+    ingested_dir: stage00_data_ingestion
+    raw_data_dir: raw_data
+
+training_pipeline_config:
+    artifact_dir : artifact
+    pipeline_name : Airline
