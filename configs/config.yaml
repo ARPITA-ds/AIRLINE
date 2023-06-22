@@ -10,3 +10,12 @@ data_ingestion_config:
 training_pipeline_config:
     artifact_dir : artifact
     pipeline_name : Airline
+
+
+data_transformation_config:
+    data_transformation_dir: stage02_data_transformation
+    preprocessing_object_dir: preprocessing
+    preprocessing_object_file_name: preprocessing_obj.pkl
+    data_transformed_dir: transformed_data
+    transformed_train_dir_key: train.csv
+    transformed_test_dir_key: test.csv

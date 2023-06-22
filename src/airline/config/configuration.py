@@ -6,7 +6,7 @@ from pathlib import Path
 from airline.logger import logger
 from airline.exception import AirlineException
 from airline.constants import (CURRENT_TIME_STAMP,CONFIG_FILE_PATH,ROOT_DIR)
-from airline.entity import DataIngestionConfig,TrainingPipelineConfig
+from airline.entity import DataIngestionConfig,TrainingPipelineConfig,DataTransformationConfig
 from airline.utils import read_yaml,create_directories
 
 class ConfigurationManager:
@@ -63,5 +63,44 @@ class ConfigurationManager:
                                                               pipeline_name=training_pipeline_name)
             logger.info(f"Training pipeline config:{training_pipeline_config}")
             return training_pipeline_config
+        except Exception as e:
+            raise AirlineException(e,sys) from e
+        
+
+
+    def get_data_transformation_config(self,data_ingestion_config: DataIngestionConfig)->DataTransformationConfig:
+        try:
+            logger.info("Getting data transformation config")
+            pipeline_config = self.pipeline_config
+            artifact_dir = pipeline_config.artifact_dir
+            train_data_file = data_ingestion_config.ingested_train_file_path
+            test_data_file = data_ingestion_config.ingested_test_file_path
+
+            data_transformation_config_info = self.config_info.data_transformation_config
+            data_transformation_dir_name = data_transformation_config_info.data_transformation_dir
+            data_transformation_dir = os.path.join(artifact_dir,data_transformation_dir_name)
+
+            preprocessed_object_dir = data_transformation_config_info.preprocessing_object_dir
+            preprocessed_object_name = data_transformation_config_info.preprocessing_object_file_name
+            preprocessed_object_file_path = os.path.join(data_transformation_dir,preprocessed_object_dir,preprocessed_object_name)
+
+            create_directories([os.path.dirname(preprocessed_object_file_path)])
+
+            data_transformed_dir = data_transformation_config_info.data_transformed_dir
+            transformed_train_dir_key = data_transformation_config_info.transformed_train_dir_key
+            transformed_test_dir_key = data_transformation_config_info.transformed_test_dir_key
+            data_transformed_train_file_path = os.path.join(data_transformation_dir,data_transformed_dir,transformed_train_dir_key)
+            data_transformed_test_file_path = os.path.join(data_transformation_dir,data_transformed_dir,transformed_test_dir_key)
+
+            create_directories([os.path.dirname(data_transformed_train_file_path)])
+            create_directories([os.path.dirname(data_transformed_test_file_path)])
+
+            data_transformation_config = DataTransformationConfig(train_data_file=train_data_file,
+                                                                  test_data_file=test_data_file,
+                                                                  preprocessed_object_file_path=preprocessed_object_file_path,
+                                                                  data_transformed_train_file_path = data_transformed_train_file_path,
+                                                                  data_transformed_test_file_path = data_transformed_test_file_path)
+            
+            return data_transformation_config
         except Exception as e:
             raise AirlineException(e,sys) from e
