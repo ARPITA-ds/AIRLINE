@@ -1,6 +1,6 @@
 data_ingestion_config:
     dataset_download_file_name: Airline_satisfaction.csv
-    dataset_download_id: https://raw.githubusercontent.com/ARPITA-ds/AIRLINE/master/cleaned_airline.csv
+    dataset_download_id: https://raw.githubusercontent.com/ARPITA-ds/AIRLINE/master/cleaned_airline1.csv
     ingested_dir: ingested_data
     ingested_test_file: test.csv
     ingested_train_file: train.csv
