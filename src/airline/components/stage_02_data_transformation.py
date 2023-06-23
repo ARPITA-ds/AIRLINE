@@ -103,10 +103,12 @@ class DataTransformation:
             logger.info("Dropping irrelevant featues")
             train_df.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1,inplace=True)
 
+            logger.info("Creating Pre=processing object")
             preprocessing_obj = self.get_data_transformation_obj()
 
             #target_column = ["satisfaction"]satisfaction
 
+            logger.info("Creating train test file")
             X_train = train_df.drop(['satisfaction'],axis=1)
             y_train = train_df['satisfaction']
 
@@ -114,24 +116,32 @@ class DataTransformation:
             X_test = test_df.drop(['satisfaction'],axis=1)
             y_test = test_df['satisfaction']
 
+            logger.info("Doing transformation")
             X_train = preprocessing_obj.fit_transform(X_train)
             X_test = preprocessing_obj.transform(X_test)
 
             #y_train = preprocessing_obj.fit_transform(y_train)
             #y_test = preprocessing_obj.transform(y_test)
 
+            logger.info("Creating train test array")
             train_arr = np.c_[X_train,np.array(y_train)]
             test_arr = np.c_[X_test,np.array(y_test)]
 
+            logger.info("Creating dataframe")
             df_train = pd.DataFrame(train_arr)
             df_test = pd.DataFrame(test_arr)
 
+            
+
+            #logger.info("Creating directories for train file")
             os.makedirs(os.path.dirname(self.data_transformation_config_info.data_transformed_train_file_path),exist_ok=True)
             df_train.to_csv(self.data_transformation_config_info.data_transformed_train_file_path,index=False,header=True)
-
+            
+            logger.info("Creating directories for test file")
             os.makedirs(os.path.dirname(self.data_transformation_config_info.data_transformed_test_file_path),exist_ok=True)
             df_test.to_csv(self.data_transformation_config_info.data_transformed_test_file_path,index=False,header=True)
 
+            logger.info("Saving object")
             save_object(file_path = self.data_transformation_config_info.preprocessed_object_file_path,obj=preprocessing_obj)
 
             return(train_arr,test_arr,self.data_transformation_config_info.preprocessed_object_file_path)

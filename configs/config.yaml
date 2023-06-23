@@ -17,5 +17,5 @@ data_transformation_config:
     preprocessing_object_dir: preprocessing
     preprocessing_object_file_name: preprocessing_obj.pkl
     data_transformed_dir: transformed_data
-    transformed_train_dir_key: train.csv
-    transformed_test_dir_key: test.csv
+    transformed_train_dir_key: train_csv
+    transformed_test_dir_key: test_csv
