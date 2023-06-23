@@ -9,6 +9,7 @@ from airline.exception import AirlineException
 from airline.logger import logger
 from sklearn.model_selection import StratifiedShuffleSplit
 from ensure import ensure_annotations
+from airline.components.stage_02_data_transformation import DataTransformation
 
 class DataIngestion:
 
@@ -97,3 +98,6 @@ if __name__=="__main__":
     data_ingestion = DataIngestion(data_ingestion_config)
     train_file_path,test_file_path = data_ingestion.initiate_data_ingestion()
     data_transformation_config = config.get_data_transformation_config(data_ingestion_config=data_ingestion_config)
+
+    data_transformation = DataTransformation(data_transformation_config_info=data_transformation_config)
+    train_arr,test_arr,_= data_transformation.initiate_data_transformation()

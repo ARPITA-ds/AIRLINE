@@ -1,0 +1,4 @@
+base_model_features_to_drop:
+- Departure Delay in Minutes
+- Arrival Delay in Minutes
+- Gate location
