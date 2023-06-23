@@ -90,18 +90,42 @@ class DataTransformation:
         except Exception as e:
             logger.info("Outliers handling code")
             raise AirlineException(e,sys) from e
+        
+
+    def dropping_missing_values(self,data):
+        try:
+            missing_values = data.isnull().sum()
+            if missing_values.any():
+                logger.info("Missing Value found")
+                cleaned_data = data.dropna(inplace = True)
+                return cleaned_data
+            else:
+                logger.info("No missing value found")
+        except Exception as e:
+            raise AirlineException(e,sys) from e
     
-
-
-
     def initiate_data_transformation(self):
         try:
-            logger.info("Handling Missing Values")
-            train_df = self.train_df.dropna()
-            test_df = self.test_df.dropna()
+            data_transformation_config_info = self.data_transformation_config_info
+            train_data = pd.read_csv(self.data_transformation_config_info.train_data_file)
+            test_data = pd.read_csv(self.data_transformation_config_info.test_data_file)
+
+            logger.info(f"{'>>' * 10}Handling missing value log started.{'<<' * 10} ")
+
+            logger.info(f"Missing_values in train_dataframe are:{(train_data.isnull().mean())*100}")
+            train_df = self.dropping_missing_values(data = train_data)
+            logger.info(f"After handling Missing_values in train_dataframe are:{(train_data.isnull().mean())*100}")
+
+            logger.info(f"Missing_values in test_dataframe are:{(test_data.isnull().mean())*100}")
+            test_df = self.dropping_missing_values(data = test_data)
+            logger.info(f"After handling Missing_values in test_dataframe are:{(test_data.isnull().mean())*100}")
+
+            logger.info(f"{'>>' * 10}Handling missing value log Ended.{'<<' * 10} ")
+
+
 
             logger.info("Dropping irrelevant featues")
-            train_df.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1,inplace=True)
+            #train_df.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1,inplace=True)
 
             logger.info("Creating Pre=processing object")
             preprocessing_obj = self.get_data_transformation_obj()
