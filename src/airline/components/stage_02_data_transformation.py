@@ -110,35 +110,74 @@ class DataTransformation:
             train_data = pd.read_csv(self.data_transformation_config_info.train_data_file)
             test_data = pd.read_csv(self.data_transformation_config_info.test_data_file)
 
+            
+            print(train_data.columns)
+            print(test_data.columns)
+
+            train_data.columns = train_data.columns.str.strip()
+            test_data.columns = test_data.columns.str.strip()
+
+            # Map values for the 'satisfaction' column
+            satisfaction_mapping = {
+                'satisfied': 1,
+                'neutral or dissatisfied': 0
+            }
+            train_data['satisfaction'] = train_data['satisfaction'].map(satisfaction_mapping)
+            test_data['satisfaction'] = test_data['satisfaction'].map(satisfaction_mapping)
+
+
+            logger.info('Read train and test data completed')
+            logger.info(f'Train Dataframe Head : \n{train_data.head().to_string()}')
+            logger.info(f'Test Dataframe Head  : \n{test_data.head().to_string()}')
+
+
+            numerical_features =['Age','Flight Distance','Inflight wifi service','Departure/Arrival time convenient','Ease of Online booking',
+                    'Food and drink','Online boarding','Seat comfort','Inflight entertainment','On-board service','Leg room service','Baggage handling',
+                    'Checkin service','Inflight service','Cleanliness']
+            
+            for col in numerical_features:
+                self.remove_outlier_IQR(col=col,df=train_data)
+            logger.info("Outliers on our data")
+
+            for col in numerical_features:
+                self.remove_outlier_IQR(col=col,df=test_data)
+            logger.info("Outliers on our test data")
+
+            #logger.info("Dropping irrelevant featues")
+            #train_data = train_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
+            #test_data = test_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
+
+
             logger.info(f"{'>>' * 10}Handling missing value log started.{'<<' * 10} ")
 
             logger.info(f"Missing_values in train_dataframe are:{(train_data.isnull().mean())*100}")
-            train_df = self.dropping_missing_values(data = train_data)
+            self.dropping_missing_values(data = train_data)
             logger.info(f"After handling Missing_values in train_dataframe are:{(train_data.isnull().mean())*100}")
 
             logger.info(f"Missing_values in test_dataframe are:{(test_data.isnull().mean())*100}")
-            test_df = self.dropping_missing_values(data = test_data)
+            self.dropping_missing_values(data = test_data)
             logger.info(f"After handling Missing_values in test_dataframe are:{(test_data.isnull().mean())*100}")
 
             logger.info(f"{'>>' * 10}Handling missing value log Ended.{'<<' * 10} ")
 
-
-
             logger.info("Dropping irrelevant featues")
-            #train_df.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1,inplace=True)
+            train_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
+            test_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
+            
 
             logger.info("Creating Pre=processing object")
             preprocessing_obj = self.get_data_transformation_obj()
 
-            #target_column = ["satisfaction"]satisfaction
+            target_column = ["satisfaction"]
 
             logger.info("Creating train test file")
-            X_train = train_df.drop(['satisfaction'],axis=1)
-            y_train = train_df['satisfaction']
+            #X_train = train_df.drop(['satisfaction'],axis=1)
+            X_train = train_data.drop(columns=target_column,axis=1)
+            y_train = train_data['satisfaction']
 
             
-            X_test = test_df.drop(['satisfaction'],axis=1)
-            y_test = test_df['satisfaction']
+            X_test = test_data.drop(['satisfaction'],axis=1)
+            y_test = test_data['satisfaction']
 
             logger.info("Doing transformation")
             X_train = preprocessing_obj.fit_transform(X_train)
