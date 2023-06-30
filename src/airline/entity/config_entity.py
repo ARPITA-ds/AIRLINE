@@ -19,4 +19,8 @@ class DataTransformationConfig(BaseModel):
     preprocessed_object_file_path: Path
     data_transformed_train_file_path: Path
     data_transformed_test_file_path: Path
+
+class ModelTrainerConfig(BaseModel):
+    #model_report_dir: DirectoryPath
+    trained_model_file_path: Path
     

@@ -1,2 +1,2 @@
-from airline.entity.config_entity import DataIngestionConfig,TrainingPipelineConfig,DataTransformationConfig
+from airline.entity.config_entity import DataIngestionConfig,TrainingPipelineConfig,DataTransformationConfig,ModelTrainerConfig
 from airline.entity.artifact_entity import DataIngestionArtifact

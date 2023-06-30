@@ -19,3 +19,8 @@ data_transformation_config:
     data_transformed_dir: transformed_data
     transformed_train_dir_key: train_csv
     transformed_test_dir_key: test_csv
+
+
+model_trainer_config:
+  model_reports_dir: model_eval_reports
+  model_trainer_dir: stage04_model_training
