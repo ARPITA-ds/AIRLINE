@@ -4,6 +4,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import pickle
+
+
 import dill
 import joblib
 import numpy as np
@@ -56,7 +59,17 @@ def save_object(file_path: Path, obj: object):
             dill.dump(obj, file_obj)
     except Exception as e:
         raise AirlineException(e, sys) from e
+    
 
+
+    
+
+def load_object(file_path):
+    try:
+        with open(file_path, "rb") as file_objt:
+            return pickle.load(file_objt)
+    except Exception as e:
+        raise AirlineException(e, sys)
 
 
 
