@@ -12,6 +12,76 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.base import BaseEstimator,TransformerMixin
+
+class Feature_Engineering(BaseEstimator,TransformerMixin):
+    def __init__(self):
+         logger.info(f"\n{'*'*20} Feature Engneering Started {'*'*20}\n\n")
+
+
+    def remove_outlier_IQR(self,col,df):
+        try:
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+
+            iqr = Q3-Q1
+
+            upper_limit = Q3+1.5*iqr
+            lower_limit = Q1-1.5*iqr
+
+            df.loc[(df[col]>upper_limit),col] = upper_limit
+            df.loc[(df[col]<lower_limit),col] = lower_limit
+
+            return df
+
+        except Exception as e:
+            logger.info("Outliers handling code")
+            raise AirlineException(e,sys) from e
+
+
+    def transform_data(self,df):
+        try:
+            num_col = [feature for feature in df.columns if df[feature].dtype != '0']
+            
+            logger.info(f"numerical_columns: {num_col}")
+
+
+            cat_col = [feature for feature in df.columns if df[feature].dtype == 'O']
+            logger.info(f"categorical_columns: {cat_col}")
+
+            #df.drop(columns=['Unnamed: 0','Gate location','Departure Delay in Minutes', 'Arrival Delay in Minutes'], inplace=True, axis=1)
+
+            logger.info(f"columns in dataframe are: {df.columns}")
+
+            numerical_columns = [ 'Age', 'Flight Distance', 'Inflight wifi service', 'Departure/Arrival time convenient',
+                                   'Ease of Online booking', 'Food and drink', 'Online boarding', 'Seat comfort', 
+                                   'Inflight entertainment', 'On-board service', 'Leg room service', 'Baggage handling', 
+                                   'Checkin service', 'Inflight service', 'Cleanliness' ]
+
+
+# outlier
+
+            for col in numerical_columns:
+                self.remove_outlier_IQR(col=col, df= df)
+            
+            logger.info(f"Outlier capped in train df")
+            return df 
+            
+        except Exception as e:
+            raise AirlineException(e,sys)
+        
+    
+    def fit(self,X,y=None):
+        return self
+    
+    
+    def transform(self,X:pd.DataFrame,y=None):
+        try:    
+            transformed_df=self.transform_data(X)
+                
+            return transformed_df
+        except Exception as e:
+            raise AirlineException(e,sys) from e
 
 class DataTransformation:
     def __init__(self,data_transformation_config_info:DataTransformationConfig) -> None:
@@ -72,7 +142,7 @@ class DataTransformation:
             raise AirlineException(e,sys) from e
         
     
-    def remove_outlier_IQR(self,col,df):
+    #def remove_outlier_IQR(self,col,df):
         try:
             Q1 = df[col].quantile(0.25)
             Q3 = df[col].quantile(0.75)
@@ -101,6 +171,14 @@ class DataTransformation:
                 return cleaned_data
             else:
                 logger.info("No missing value found")
+        except Exception as e:
+            raise AirlineException(e,sys) from e
+        
+    def get_feature_engineering_object(self):
+        try:
+            
+            feature_engineering = Pipeline(steps = [("fe",Feature_Engineering())])
+            return feature_engineering
         except Exception as e:
             raise AirlineException(e,sys) from e
     
@@ -135,13 +213,13 @@ class DataTransformation:
                     'Food and drink','Online boarding','Seat comfort','Inflight entertainment','On-board service','Leg room service','Baggage handling',
                     'Checkin service','Inflight service','Cleanliness']
             
-            for col in numerical_features:
-                self.remove_outlier_IQR(col=col,df=train_data)
-            logger.info("Outliers on our data")
+            #for col in numerical_features:
+                #self.remove_outlier_IQR(col=col,df=train_data)
+            #logger.info("Outliers on our data")
 
-            for col in numerical_features:
-                self.remove_outlier_IQR(col=col,df=test_data)
-            logger.info("Outliers on our test data")
+            #for col in numerical_features:
+                #self.remove_outlier_IQR(col=col,df=test_data)
+            #logger.info("Outliers on our test data")
 
             #logger.info("Dropping irrelevant featues")
             #train_data = train_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
@@ -163,6 +241,30 @@ class DataTransformation:
             logger.info("Dropping irrelevant featues")
             train_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
             test_data.drop(['Departure Delay in Minutes', 'Arrival Delay in Minutes','Gate location'],axis=1)
+
+            logger.info(f"obtaining feature engineering object.")
+            fe_obj = self.get_feature_engineering_object()
+
+            logger.info(f"Applying feature engineering object on training dataframe and testing dataframe")
+            logger.info(">>>" * 20 + " Training data " + "<<<" * 20)
+            logger.info(f"Feature Enineering - Train Data ")
+            train_data = fe_obj.fit_transform(train_data)
+            logger.info(">>>" * 20 + " Test data " + "<<<" * 20)
+            logger.info(f"Feature Enineering - Test Data ")
+            test_data = fe_obj.transform(test_data)
+
+            if train_data is not None:
+                train_data.to_csv("train_data.csv")
+                logger.info(f"Saving csv to train_data.csv")
+
+            if test_data is not None:
+                test_data.to_csv("test_data.csv")
+                logger.info(f"Saving csv to test_data.csv")
+
+
+           #train_data.to_csv("train_data.csv")
+            #test_data.to_csv("test_data.csv")
+            logger.info(f"Saving csv to train_data and test_data.csv")
             
 
             logger.info("Creating Pre=processing object")
@@ -206,6 +308,9 @@ class DataTransformation:
 
             logger.info("Saving object")
             save_object(file_path = self.data_transformation_config_info.preprocessed_object_file_path,obj=preprocessing_obj)
+
+            save_object(file_path = self.data_transformation_config_info.feature_eng_obj_file_path,obj= fe_obj)
+            logger.info("Feature engineering file saved")
 
             return(train_arr,test_arr,self.data_transformation_config_info.preprocessed_object_file_path)
 

@@ -84,6 +84,9 @@ class ConfigurationManager:
             preprocessed_object_name = data_transformation_config_info.preprocessing_object_file_name
             preprocessed_object_file_path = os.path.join(data_transformation_dir,preprocessed_object_dir,preprocessed_object_name)
 
+            feature_object_name = data_transformation_config_info.feature_eng_obj_file_name
+            feature_eng_obj_file_path = os.path.join(data_transformation_dir,preprocessed_object_dir,feature_object_name)
+
             create_directories([os.path.dirname(preprocessed_object_file_path)])
 
             data_transformed_dir = data_transformation_config_info.data_transformed_dir
@@ -95,11 +98,16 @@ class ConfigurationManager:
             create_directories([os.path.dirname(data_transformed_train_file_path)])
             create_directories([os.path.dirname(data_transformed_test_file_path)])
 
+            #FEATURE_ENG_OBJ_PATH = os.path.join(ROOT_DIR,ARTIFACT_DIR_KEY,
+                                      #DATA_TRANSFORMATION_ARTIFACT,DATA_PREPROCESSED_DIR,
+                                      #'feature_eng.pkl')
+
             data_transformation_config = DataTransformationConfig(train_data_file=train_data_file,
                                                                   test_data_file=test_data_file,
                                                                   preprocessed_object_file_path=preprocessed_object_file_path,
                                                                   data_transformed_train_file_path = data_transformed_train_file_path,
-                                                                  data_transformed_test_file_path = data_transformed_test_file_path)
+                                                                  data_transformed_test_file_path = data_transformed_test_file_path,
+                                                                  feature_eng_obj_file_path=feature_eng_obj_file_path)
             
             return data_transformation_config
         except Exception as e:

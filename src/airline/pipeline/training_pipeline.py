@@ -15,7 +15,7 @@ if __name__=="__main__":
     data_transformation = DataTransformation(data_transformation_config_info=data_transformation_config)
     train_arr,test_arr,_= data_transformation.initiate_data_transformation()
 
-    model_trainer_config = config.get_model_trainer_config(data_ingestion_config=data_ingestion_config, data_transformation_config_info=data_transformation_config)
-    model_trainer = ModelTrainer(model_trainer_config=model_trainer_config)
+    #model_trainer_config = config.get_model_trainer_config(data_ingestion_config=data_ingestion_config, data_transformation_config_info=data_transformation_config)
+    #model_trainer = ModelTrainer(model_trainer_config=model_trainer_config)
 
-    print(model_trainer.initate_model_training(train_arr,test_arr))
+    #print(model_trainer.initate_model_training(train_arr,test_arr))
