@@ -70,6 +70,16 @@ def load_object(file_path):
             return pickle.load(file_objt)
     except Exception as e:
         raise AirlineException(e, sys)
+    
+
+def load_model(file_path):
+    try:
+        with open(file_path,'rb') as file_obj:
+            return pickle.load(file_obj)
+        
+    except Exception as e:
+        logger.info("Exception occured while loading a model")
+        raise AirlineException(e,sys)
 
 
 

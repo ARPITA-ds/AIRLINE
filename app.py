@@ -1,13 +1,44 @@
 from flask import Flask, render_template, request, jsonify
 from airline.pipeline.prediction_pipeline import PredictionPipeline, CustomClass
+from prediction.batch import batch_prediction
+import os
+from airline.logger import logger
+from airline.components.stage_02_data_transformation import DataTransformationConfig
+from airline.components.model_trainer import ModelTrainerConfig
+from airline.config.configuration import ConfigurationManager
+from airline.pipeline.training_pipeline import Train
+from werkzeug.utils import secure_filename
+
+data_transformation_config_info = DataTransformationConfig
+#model_trainer_config = ModelTrainerConfig
+#model_trainer_config = model_trainer_config
+
+
+#model_file_path = model_trainer_config.trained_model_file_path
+model_file_path = r"artifact\stage04_model_training\best_model\best_model.pkl"
+#transformer_file_path = data_transformation_config_info.preprocessed_object_file_path
+transformer_file_path = r"artifact\stage02_data_transformation\preprocessing\preprocessing_obj.pkl"
+#feature_engineering_file_path = data_transformation_config_info.feature_eng_obj_file_path
+feature_engineering_file_path = r"artifact\stage02_data_transformation\preprocessing\feature_eng.pkl"
+
+#data_transformation_config_info = DataTransformationConfig
+
+UPLOAD_FOLDER = 'batch_prediction/Uploaded_CSV_FILE'
 
 app = Flask(__name__,template_folder='template')
 
+app = app
+ALLOWED_EXTENSIONS = {'csv'}
 
-@app.route("/",methods = ["GET", "POST"])
+@app.route('/')
+def home_page():
+    return render_template('index.html')
+
+
+@app.route('/predict',methods=['GET','POST'])
 def prediction_data():
     if request.method == "GET":
-        return render_template("home.html")
+        return render_template("form.html")
     
     else:
         data = CustomClass(
@@ -33,6 +64,7 @@ def prediction_data():
             
         )
 
+    
     final_data = data.get_data_DataFrame()
     pipeline_prediction = PredictionPipeline()
     pred = pipeline_prediction.predict(final_data)
@@ -45,5 +77,66 @@ def prediction_data():
     elif result == 1:
             return render_template("results.html", final_result = "Survey Opinion of the customer is dissatisfied or neutral:{}".format(result) )
     
-if __name__ == "__main__":
-     app.run(host = "0.0.0.0", debug = True)
+@app.route("/batch", methods=['GET','POST'])
+def perform_batch_prediction():
+    
+    
+    if request.method == 'GET':
+        return render_template('batch.html')
+    else:
+        file = request.files['csv_file']  # Update the key to 'csv_file'
+        # Directory path
+        directory_path = UPLOAD_FOLDER
+        # Create the directory
+        os.makedirs(directory_path, exist_ok=True)
+
+        # Check if the file has a valid extension
+        if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
+            # Delete all files in the file path
+            for filename in os.listdir(os.path.join(UPLOAD_FOLDER)):
+                file_path = os.path.join(UPLOAD_FOLDER, filename)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+
+            # Save the new file to the uploads directory
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(file_path)
+            print(file_path)
+
+            logger.info("CSV received and Uploaded")
+
+            # Perform batch prediction using the uploaded file
+            batch = batch_prediction(file_path,
+                                    model_file_path,
+                                    transformer_file_path,
+                                    feature_engineering_file_path)
+            batch.start_batch_prediction()
+
+            output = "Batch Prediction Done"
+            return render_template("batch.html", prediction_result=output, prediction_type='batch')
+        else:
+            return render_template('batch.html', prediction_type='batch', error='Invalid file type')
+        
+
+
+# #@app.route('/train', methods=['GET', 'POST'])
+# #def train():
+#     if request.method == 'GET':
+#         return render_template('train.html')
+#     else:
+#         try:
+#             pipeline = Train()
+#             pipeline.main()
+
+#             return render_template('train.html', message="Training complete")
+
+#         except Exception as e:
+#             logger.error(f"{e}")
+#             error_message = str(e)
+#             return render_template('index.html', error=error_message)
+        
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0',debug=True)
