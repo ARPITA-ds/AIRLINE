@@ -61,5 +61,11 @@ It is necessary to predict which of the two levels of satisfaction with the airl
 Satisfaction
 Neutral or dissatisfied
 
-#Flask Prediction UI and batch Prediction
+#Flask Prediction UI 
+<img width="960" alt="Screenshot 2023-07-22 225125" src="https://github.com/ARPITA-ds/AIRLINE/assets/96571426/1ca7e92c-efe6-4a65-a9e1-40c201f043ab">
+
 <img width="960" alt="Screenshot 2023-07-22 225151" src="https://github.com/ARPITA-ds/AIRLINE/assets/96571426/0cd0e9bd-b5c9-416e-a437-97d94f9f5f65">
+
+#Batch Prediction result
+<img width="831" alt="Screenshot 2023-07-22 225058" src="https://github.com/ARPITA-ds/AIRLINE/assets/96571426/81fdd12e-ee5a-43c2-b4bc-d35ecba956f2">
+
